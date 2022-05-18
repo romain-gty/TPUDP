@@ -18,21 +18,34 @@ public class Serveur {
             buff = new byte[128];
             ds = new DatagramSocket(p_s);
             dp = new DatagramPacket(buff, buff.length);
-            int i= 0;
-            while (i<10) {
+            int i = 0;
+            while (i < 10) {
                 ds.receive(dp);
-                InetAddress addr = dp.getAddress();
-                int portEnvoi = dp.getPort();
-                byte[] data = dp.getData();
+                new Thread() {
+                    public void run() {
+                        DatagramSocket envoi = null;
+                        try {
+                            envoi = new DatagramSocket();
+                            InetAddress addr = dp.getAddress();
+                            int portEnvoi = dp.getPort();
+                            byte[] data = dp.getData();
 
-                String texte = new String(data);
-                texte = texte.substring(0, dp.getLength());
-                System.out.println(
-                        "Reception du port " + portEnvoi + " de la machine " + addr.getHostName() + " : " + texte);
+                            String texte = new String(data);
+                            texte = texte.substring(0, dp.getLength());
+                            System.out.println(
+                                    "Reception du port " + portEnvoi + " de la machine " + addr.getHostName() + " : "
+                                            + texte);
 
-                DatagramPacket echo = new DatagramPacket(data, data.length, addr, portEnvoi);
+                            DatagramPacket echo = new DatagramPacket(data, data.length, addr, portEnvoi);
 
-                ds.send(echo);
+                            envoi.send(echo);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                        envoi.close();
+                    }
+                }.start();
+
                 i++;
             }
             ds.close();

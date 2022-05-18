@@ -3,16 +3,18 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class Client {
-    int p_c;
 
-    public Client(int port, int portdest, InetAddress addrDest){
+    public Client(){        
+    }
+
+    public void sendMessage(String Message, int portdest, InetAddress addrDest){
         DatagramSocket ds;
         DatagramPacket dp;
         byte[] buff;
 
         try{
-            ds = new DatagramSocket(port);
-            String ligne = "Hello There";
+            ds = new DatagramSocket();
+            String ligne = Message;
             byte[] message = ligne.getBytes();
             dp = new DatagramPacket(message, message.length,addrDest,  portdest);
             ds.send(dp);

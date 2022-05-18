@@ -4,6 +4,6 @@ public class App {
        Util.affichePorts();*/
 
        Serveur s = new Serveur(5000);
-      
+      s.start();
     }
 }

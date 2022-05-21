@@ -1,4 +1,4 @@
-public class App {
+public class AppServer {
     public static void main(String[] args) throws Exception {
       /* Util.scan(1024, 10000);
        Util.affichePorts();*/

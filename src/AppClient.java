@@ -1,6 +1,6 @@
 import java.net.InetAddress;
 
-public class Appclient {
+public class AppClient {
     public static void main(String[] args) throws Exception {
 
         Client c = new Client();

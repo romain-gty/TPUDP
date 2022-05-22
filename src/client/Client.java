@@ -1,4 +1,5 @@
 package client;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,21 +20,30 @@ public class Client {
         try {
             ds = new DatagramSocket();
             String ligne = Message;
+            dp = new DatagramPacket("ok?".getBytes(), "ok?".getBytes().length, addrDest, portdest);
+            ds.send(dp);
+
+            buff = new byte[8192];
+            DatagramPacket dpR = new DatagramPacket(buff, buff.length);
+            ds.receive(dpR);
+            portdest = dpR.getPort();
+
             byte[] message = ligne.getBytes();
-            
             dp = new DatagramPacket(message, message.length, addrDest, portdest);
             ds.send(dp);
 
-            buff = new byte[128];
+            buff = new byte[8192];
             DatagramPacket recep = new DatagramPacket(buff, buff.length);
             ds.receive(recep);
             InetAddress addr = recep.getAddress();
             int portEnvoi = recep.getPort();
             byte[] data = recep.getData();
             String texte = new String(data);
-            texte = texte.substring(0, dp.getLength());
             System.out
-                    .println("Reception du port " + portEnvoi + " de la machine " + addr.getHostName() + " : " + texte);
+                    .println("Reception du port " + portEnvoi + " de la machine " + addr.getHostName() + " :\n" + texte+"\n");
+
+            dp = new DatagramPacket("ok".getBytes(), "ok".getBytes().length, addrDest, portdest);
+            ds.send(dp);
 
             ds.close();
 

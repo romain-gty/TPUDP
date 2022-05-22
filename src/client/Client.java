@@ -16,29 +16,40 @@ public class Client {
     public Client() {
     }
 
-    public void sendMessage(String Message, int portdest, InetAddress addrDest) {
-        DatagramSocket ds;
+
+    /**
+     * Envoie le message au destinataire en parametre
+     * @param Message Le message à envoyer
+     * @param portdest Le port de la machine de destination
+     * @param addrDest L'ip de la machine de destination, une InetAddress
+     */
+    private void sendMessage(String Message, int portdest, InetAddress addrDest) {
+        DatagramSocket ds = null;
         DatagramPacket dp;
         byte[] buff;
 
         try {
             ds = new DatagramSocket();
             String ligne = Message;
-            dp = new DatagramPacket("ok?".getBytes(), "ok?".getBytes().length, addrDest, portdest);
+            dp = new DatagramPacket("ok?".getBytes(), "ok?".getBytes().length, addrDest, portdest); //ouverture de la connexion
             ds.send(dp);
 
-            buff = new byte[128];
+            buff = new byte[128]; //réception de l'acquiescement d'ouverture
             DatagramPacket dpR = new DatagramPacket(buff, buff.length);
             Util.waitresponse(dpR, ds);
             portdest = dpR.getPort();
             String messageRecu = new String(dpR.getData());
             messageRecu = messageRecu.substring(0, 2);
-            if ("ok".equals(messageRecu)) {
+            if ("ok".equals(messageRecu)) { //si acquiescement reçu
 
+
+                //envoi du message
                 byte[] message = ligne.getBytes();
                 dp = new DatagramPacket(message, message.length, addrDest, portdest);
                 ds.send(dp);
 
+
+                //réception du message du serveur
                 buff = new byte[8192];
                 DatagramPacket recep = new DatagramPacket(buff, buff.length);
                 Util.waitresponse(recep, ds);
@@ -49,24 +60,25 @@ public class Client {
                 System.out
                         .println("Reception du port " + portEnvoi + " de la machine " + addr.getHostName() + " :\n"
                                 + texte + "\n");
-
+                
+                //attente de fermeture
                 DatagramPacket endCom = new DatagramPacket(buff, buff.length);
                 Util.waitresponse(endCom, ds);
                 messageRecu = new String(endCom.getData());
                 messageRecu = messageRecu.substring(0, 2);
-                if ("ko".equals(messageRecu)) {
+                if ("ko".equals(messageRecu)) { //si demande de femeture reçu on aquiesce
                     dp = new DatagramPacket("ok".getBytes(), "ok".getBytes().length, addrDest, portdest);
                     ds.send(dp);
                     System.out.println("Communication effectuée avec Succès !\n");
-                } else {
+                } else { //si pas d'acquiescement reçu on lance une erreur
                     throw new MyStandardException("Erreur lors de la fermeture de la connexion.\n");
                 }
 
-            } else {
+            } else { //si pas d'acquiescement reçu
                 throw new MyStandardException("Connection non validée par l'hôte\n");
             }
 
-            ds.close();
+            
 
         } catch (MyTimeoutException e) {
             System.out.println("Temps d'attente dépassée\n");
@@ -76,13 +88,18 @@ public class Client {
             System.out.println("Une erreur est survenue lors de la communication :\nMessage de l'ereur :\n"
                     + e.getMessage() + "\n");
         }
+        ds.close(); //on ferme le socket dans tous les cas
         System.out.println("Fin de connexion\n");
     }
 
-    public void sendMessage() {
-        String mess; // We're going to read all user's text into a String and we try to convert it
-                     // later
 
+
+    /***
+     * Permet à l'utilisateur d'envoyer un message par la CLI
+     * @return false si l'utilsateur n'a pas demandé à quitter (en tapant q ou exit à la place du message), true sinon
+     */
+    public boolean sendMessage() {
+        String mess;
         System.out.println("Entrez le port de destination");
         int port_dest;
         do {
@@ -101,6 +118,7 @@ public class Client {
         mess = lectureStringClavier();
         if (mess.equals("q") || mess.equals("exit")) {
             System.out.println("Sortie du programme !\n");
+            return true;
         } else {
 
             try {
@@ -110,6 +128,7 @@ public class Client {
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
+            return false;
         }
     }
 

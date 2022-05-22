@@ -1,3 +1,4 @@
+package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,6 +20,7 @@ public class Client {
             ds = new DatagramSocket();
             String ligne = Message;
             byte[] message = ligne.getBytes();
+            
             dp = new DatagramPacket(message, message.length, addrDest, portdest);
             ds.send(dp);
 

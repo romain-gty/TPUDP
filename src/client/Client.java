@@ -7,6 +7,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import MyException.MyStandardException;
+import MyException.MyTimeoutException;
+import Utilities.Util;
+
 public class Client {
 
     public Client() {
@@ -23,33 +27,56 @@ public class Client {
             dp = new DatagramPacket("ok?".getBytes(), "ok?".getBytes().length, addrDest, portdest);
             ds.send(dp);
 
-            buff = new byte[8192];
+            buff = new byte[128];
             DatagramPacket dpR = new DatagramPacket(buff, buff.length);
-            ds.receive(dpR);
+            Util.waitresponse(dpR, ds);
             portdest = dpR.getPort();
+            String messageRecu = new String(dpR.getData());
+            messageRecu = messageRecu.substring(0, 2);
+            if ("ok".equals(messageRecu)) {
 
-            byte[] message = ligne.getBytes();
-            dp = new DatagramPacket(message, message.length, addrDest, portdest);
-            ds.send(dp);
+                byte[] message = ligne.getBytes();
+                dp = new DatagramPacket(message, message.length, addrDest, portdest);
+                ds.send(dp);
 
-            buff = new byte[8192];
-            DatagramPacket recep = new DatagramPacket(buff, buff.length);
-            ds.receive(recep);
-            InetAddress addr = recep.getAddress();
-            int portEnvoi = recep.getPort();
-            byte[] data = recep.getData();
-            String texte = new String(data);
-            System.out
-                    .println("Reception du port " + portEnvoi + " de la machine " + addr.getHostName() + " :\n" + texte+"\n");
+                buff = new byte[8192];
+                DatagramPacket recep = new DatagramPacket(buff, buff.length);
+                Util.waitresponse(recep, ds);
+                InetAddress addr = recep.getAddress();
+                int portEnvoi = recep.getPort();
+                byte[] data = recep.getData();
+                String texte = new String(data);
+                System.out
+                        .println("Reception du port " + portEnvoi + " de la machine " + addr.getHostName() + " :\n"
+                                + texte + "\n");
 
-            dp = new DatagramPacket("ok".getBytes(), "ok".getBytes().length, addrDest, portdest);
-            ds.send(dp);
+                DatagramPacket endCom = new DatagramPacket(buff, buff.length);
+                Util.waitresponse(endCom, ds);
+                messageRecu = new String(endCom.getData());
+                messageRecu = messageRecu.substring(0, 2);
+                if ("ko".equals(messageRecu)) {
+                    dp = new DatagramPacket("ok".getBytes(), "ok".getBytes().length, addrDest, portdest);
+                    ds.send(dp);
+                    System.out.println("Communication effectuée avec Succès !\n");
+                } else {
+                    throw new MyStandardException("Erreur lors de la fermeture de la connexion.\n");
+                }
+
+            } else {
+                throw new MyStandardException("Connection non validée par l'hôte\n");
+            }
 
             ds.close();
 
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        } catch (MyTimeoutException e) {
+            System.out.println("Temps d'attente dépassée\n");
         }
+
+        catch (Exception e) {
+            System.out.println("Une erreur est survenue lors de la communication :\nMessage de l'ereur :\n"
+                    + e.getMessage() + "\n");
+        }
+        System.out.println("Fin de connexion\n");
     }
 
     public void sendMessage() {
@@ -65,19 +92,24 @@ public class Client {
         int[] ip = new int[4];
 
         for (int i = 0; i < 4; i++) {
-            System.out.println("Entrez l'octet " + i + " de l'IP de destination");
+            System.out.println("Entrez l'octet " + (i + 1) + " de l'IP de destination");
             do {
                 ip[i] = lectureIntClavier();
             } while (port_dest == -1);
         }
 
         mess = lectureStringClavier();
+        if (mess.equals("q") || mess.equals("exit")) {
+            System.out.println("Sortie du programme !\n");
+        } else {
 
-        try {
-            sendMessage(mess, port_dest,
-                    InetAddress.getByAddress(new byte[] { (byte) ip[0], (byte) ip[1], (byte) ip[2], (byte) ip[3] }));
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+            try {
+                sendMessage(mess, port_dest,
+                        InetAddress
+                                .getByAddress(new byte[] { (byte) ip[0], (byte) ip[1], (byte) ip[2], (byte) ip[3] }));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 

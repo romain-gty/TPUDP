@@ -1,5 +1,5 @@
 package client;
-import java.net.InetAddress;
+//import java.net.InetAddress;
 
 public class AppClient {
     public static void main(String[] args) throws Exception {

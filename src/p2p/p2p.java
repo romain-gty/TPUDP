@@ -75,7 +75,7 @@ public class p2p {
         DatagramSocket socket = new DatagramSocket();
         socket.setBroadcast(true);
         DatagramPacket packet = new DatagramPacket("broadcast".getBytes(), "broadcast".getBytes().length,
-                InetAddress.getByName("255.255.255.255"), p_s);
+                InetAddress.getByName("10.6.0.255"), p_s);
         socket.send(packet);
         socket.close();
 
@@ -174,13 +174,7 @@ public class p2p {
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-        } else {
-            try {
-                sendBroadcast();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
+        } 
 
     }
 

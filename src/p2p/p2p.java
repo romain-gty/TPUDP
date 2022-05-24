@@ -224,7 +224,7 @@ public class p2p {
         String message = new String(data);
         String expediteur = communicant.get(addr);
 
-        System.out.println("Nouveau message de " + expediteur + " :\n" + message);
+        System.out.println("\nNouveau message de " + expediteur + " :\n" + message);
 
     }
 

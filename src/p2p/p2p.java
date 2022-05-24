@@ -7,6 +7,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import MyException.MyStandardException;
@@ -18,9 +19,11 @@ public class p2p {
     private String username;
     private HashMap<InetAddress, String> communicant; // Ip et username
 
-    public p2p(int port) {
+    public p2p(int port) throws UnknownHostException {
         p_s = port;
         communicant = new HashMap<InetAddress, String>();
+        communicant.put(InetAddress.getByName("10.6.0.1"), "linux");
+        communicant.put(InetAddress.getByName("10.6.0.4"), "pc");
     }
 
     public void start() {

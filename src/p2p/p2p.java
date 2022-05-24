@@ -40,7 +40,7 @@ public class p2p {
                 byte[] buff;
                 try {
 
-                    sendBroadcast();
+                    // sendBroadcast();
                     buff = new byte[128];
                     ds = new DatagramSocket(p_s);
                     dp = new DatagramPacket(buff, buff.length);
@@ -98,42 +98,23 @@ public class p2p {
                 DatagramSocket envoi = null;
                 try {
                     envoi = new DatagramSocket(); // ouverture d'un nouveau port pour répondre au client
-                    InetAddress addr = dp.getAddress();
-                    int portEnvoi = dp.getPort();
-                    byte[] data = dp.getData();
 
-                    String texte = new String(data);
-                    System.out.println(texte);
-                    texte = texte.substring(0, dp.getLength());
 
-                    if (texte.equals("ok?")) { // si c'était une demande d'ouverture
-                        DatagramPacket openCom = new DatagramPacket("ok".getBytes(), "ok".getBytes().length, addr,
-                                portEnvoi);
-                        envoi.send(openCom); // on acquiesce
-
-                        Util.waitresponse(dp, envoi); // on attend la requête de l'utilisateur
-
-                        displayInMessage(dp);
-
-                        byte[] dataToSend = "ko".getBytes(); // on demande la fermeture de connection
-                        DatagramPacket endCom = new DatagramPacket(dataToSend, dataToSend.length, addr, portEnvoi);
-                        envoi.send(endCom);
-
-                        // on attend la réponse pendant 500ms, on quitte avec ou sans réponse
-                        Util.waitresponse(dp, envoi);
-                        // System.out.println("Communication effectuée avec succès\n");
-                    } else if (texte.equals("broadcast")) {
-                        DatagramPacket broadCastResponse = new DatagramPacket(username.getBytes(),
-                                username.getBytes().length,
-                                addr,
-                                portEnvoi);
-                        envoi.send(broadCastResponse); // on acquiesce
-                    } else {
-                        if (communicant.get(addr) != null) {
-                            communicant.remove(addr);
-                        }
-                        communicant.put(addr, texte);
-                    }
+                    displayInMessage(dp);
+                    /*
+                     * else if (texte.equals("broadcast")) {
+                     * DatagramPacket broadCastResponse = new DatagramPacket(username.getBytes(),
+                     * username.getBytes().length,
+                     * addr,
+                     * portEnvoi);
+                     * envoi.send(broadCastResponse); // on acquiesce
+                     * } else {
+                     * if (communicant.get(addr) != null) {
+                     * communicant.remove(addr);
+                     * }
+                     * communicant.put(addr, texte);
+                     * }
+                     */
 
                 } catch (MyTimeoutException e) {
                     System.out.println("Temps d'attente dépassée\n");
@@ -156,36 +137,44 @@ public class p2p {
      *         à la place du message), true sinon
      */
     public void sendMessage() {
-        if (communicant.size() > 0) {
-            HashMap<Integer, InetAddress> ListIP = new HashMap<Integer, InetAddress>();
-            String mess;
-            int i = 1;
-            for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
-                System.out.println(i + '\t' + entry.getValue());
-                ListIP.put(i, entry.getKey());
-            }
-            System.out.println("Entrez le numéro du destinataire");
-            int port_dest = 5000;
-            int num_dest;
-
-            do {
-                num_dest = lectureIntClavier();
-            } while ((num_dest == -1) || (num_dest >= i));
-
-            mess = lectureStringClavier();
-
-            try {
-                sendMessage(mess, port_dest, ListIP.get(num_dest));
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-        } else {
-            try {
-                sendBroadcast();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
+        // if (communicant.size() > 0) {
+        HashMap<Integer, InetAddress> ListIP = new HashMap<Integer, InetAddress>();
+        String mess;
+        int i = 1;
+        for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
+            System.out.println(i + "   " + entry.getValue());
+            ListIP.put(i, entry.getKey());
+            i++;
         }
+
+        System.out.println("Entrez le numéro du destinataire");
+        int port_dest = 5000;
+        int num_dest;
+
+        do {
+
+            num_dest = lectureIntClavier();
+        } while ((num_dest <= 0) || (num_dest >= i));
+        mess = "";
+        do {
+            System.out.println("entrez un message");
+            mess = lectureStringClavier();
+        } while (mess.equals(""));
+
+        try {
+            sendMessage(mess, port_dest, ListIP.get(num_dest));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        /*
+         * } else {
+         * try {
+         * sendBroadcast();
+         * } catch (Exception e) {
+         * System.out.println(e.getMessage());
+         * }
+         * }
+         */
 
     }
 
@@ -254,39 +243,11 @@ public class p2p {
         try {
             ds = new DatagramSocket();
             String ligne = Message;
-            dp = new DatagramPacket("ok?".getBytes(), "ok?".getBytes().length, addrDest, portdest); // ouverture de la
-                                                                                                    // connexion
+
+            // envoi du message
+            byte[] message = ligne.getBytes();
+            dp = new DatagramPacket(message, message.length, addrDest, portdest);
             ds.send(dp);
-
-            buff = new byte[128]; // réception de l'acquiescement d'ouverture
-            DatagramPacket dpR = new DatagramPacket(buff, buff.length);
-            Util.waitresponse(dpR, ds);
-            portdest = dpR.getPort();
-            String messageRecu = new String(dpR.getData());
-            messageRecu = messageRecu.substring(0, 2);
-            if ("ok".equals(messageRecu)) { // si acquiescement reçu
-
-                // envoi du message
-                byte[] message = ligne.getBytes();
-                dp = new DatagramPacket(message, message.length, addrDest, portdest);
-                ds.send(dp);
-
-                // attente de fermeture
-                DatagramPacket endCom = new DatagramPacket(buff, buff.length);
-                Util.waitresponse(endCom, ds);
-                messageRecu = new String(endCom.getData());
-                messageRecu = messageRecu.substring(0, 2);
-                if ("ko".equals(messageRecu)) { // si demande de femeture reçu on aquiesce
-                    dp = new DatagramPacket("ok".getBytes(), "ok".getBytes().length, addrDest, portdest);
-                    ds.send(dp);
-                    // System.out.println("Communication effectuée avec Succès !\n");
-                } else { // si pas d'acquiescement reçu on lance une erreur
-                    throw new MyStandardException("Erreur lors de la fermeture de la connexion.\n");
-                }
-
-            } else { // si pas d'acquiescement reçu
-                throw new MyStandardException("Connection non validée par l'hôte\n");
-            }
 
         } catch (MyTimeoutException e) {
             System.out.println("Temps d'attente dépassée\n");

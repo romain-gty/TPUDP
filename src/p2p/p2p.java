@@ -62,6 +62,11 @@ public class p2p {
 
         while (true) {
             sendMessage();
+            try {
+                Thread.sleep(2000);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 

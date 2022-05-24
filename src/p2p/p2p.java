@@ -27,8 +27,8 @@ public class p2p {
     }
 
     public void start() {
-        System.out.println("Quel est votre nom d'uitilisateur pour cette session ?");
-        username = lectureStringClavier();
+        //System.out.println("Quel est votre nom d'utilisateur pour cette session ?");
+        //username = lectureStringClavier();
 
         System.out.println("username: " + username);
 

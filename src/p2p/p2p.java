@@ -31,7 +31,7 @@ public class p2p {
 
         new Thread() {
             public void run() {
-                System.out.println("Serveur");
+                //System.out.println("Serveur");
                 DatagramSocket ds = null;
                 DatagramPacket dp;
                 byte[] buff;
@@ -116,7 +116,7 @@ public class p2p {
 
                         // on attend la réponse pendant 500ms, on quitte avec ou sans réponse
                         Util.waitresponse(dp, envoi);
-                        System.out.println("Communication effectuée avec succès\n");
+                        //System.out.println("Communication effectuée avec succès\n");
                     } else if (texte.equals("broadcast")) {
                         DatagramPacket broadCastResponse = new DatagramPacket(username.getBytes(),
                                 username.getBytes().length,
@@ -124,7 +124,6 @@ public class p2p {
                                 portEnvoi);
                         envoi.send(broadCastResponse); // on acquiesce
                     } else {
-                        sendBroadcast();
                         if (communicant.get(addr) != null) {
                             communicant.remove(addr);
                         }
@@ -140,7 +139,7 @@ public class p2p {
                             + e.getMessage() + "\n");
                 }
                 envoi.close();
-                System.out.println("Fin de connexion\n");
+                //System.out.println("Fin de connexion\n");
             }
         }.start();
     }
@@ -275,7 +274,7 @@ public class p2p {
                 if ("ko".equals(messageRecu)) { // si demande de femeture reçu on aquiesce
                     dp = new DatagramPacket("ok".getBytes(), "ok".getBytes().length, addrDest, portdest);
                     ds.send(dp);
-                    System.out.println("Communication effectuée avec Succès !\n");
+                    //System.out.println("Communication effectuée avec Succès !\n");
                 } else { // si pas d'acquiescement reçu on lance une erreur
                     throw new MyStandardException("Erreur lors de la fermeture de la connexion.\n");
                 }
@@ -293,6 +292,6 @@ public class p2p {
                     + e.getMessage() + "\n");
         }
         ds.close(); // on ferme le socket dans tous les cas
-        System.out.println("Fin de connexion\n");
+        //System.out.println("Fin de connexion\n");
     }
 }

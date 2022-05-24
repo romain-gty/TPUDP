@@ -20,19 +20,23 @@ public class p2p {
 
     public p2p(int port) {
         p_s = port;
+        communicant = new HashMap<InetAddress, String>();
     }
 
     public void start() {
         System.out.println("Quel est votre nom d'uitilisateur pour cette session ?");
         username = lectureStringClavier();
 
-        DatagramSocket ds = null;
-        DatagramPacket dp;
-        byte[] buff;
+        System.out.println("username: " + username);
 
         new Thread() {
             public void run() {
+                System.out.println("Serveur");
+                DatagramSocket ds = null;
+                DatagramPacket dp;
+                byte[] buff;
                 try {
+
                     sendBroadcast();
                     buff = new byte[128];
                     ds = new DatagramSocket(p_s);
@@ -56,8 +60,7 @@ public class p2p {
             }
         }.start();
 
-        boolean a = true;
-        while (a) {
+        while (true) {
             sendMessage();
         }
     }
@@ -144,27 +147,35 @@ public class p2p {
      *         à la place du message), true sinon
      */
     public void sendMessage() {
-        HashMap<Integer, InetAddress> ListIP = new HashMap<Integer, InetAddress>();
-        String mess;
-        int i = 1;
-        for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
-            System.out.println(i + '\t' + entry.getValue());
-            ListIP.put(i, entry.getKey());
-        }
-        System.out.println("Entrez le numéro du destinataire");
-        int port_dest = 5000;
-        int num_dest;
+        if (communicant.size() > 0) {
+            HashMap<Integer, InetAddress> ListIP = new HashMap<Integer, InetAddress>();
+            String mess;
+            int i = 1;
+            for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
+                System.out.println(i + '\t' + entry.getValue());
+                ListIP.put(i, entry.getKey());
+            }
+            System.out.println("Entrez le numéro du destinataire");
+            int port_dest = 5000;
+            int num_dest;
 
-        do {
-            num_dest = lectureIntClavier();
-        } while ((num_dest == -1) || (num_dest >= i));
+            do {
+                num_dest = lectureIntClavier();
+            } while ((num_dest == -1) || (num_dest >= i));
 
-        mess = lectureStringClavier();
+            mess = lectureStringClavier();
 
-        try {
-            sendMessage(mess, port_dest, ListIP.get(num_dest));
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+            try {
+                sendMessage(mess, port_dest, ListIP.get(num_dest));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        } else {
+            try {
+                sendBroadcast();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
 
     }
@@ -194,7 +205,6 @@ public class p2p {
 
     private String lectureStringClavier() {
         String mess = "";
-        System.out.println("Entrez un message");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         try {
             do {

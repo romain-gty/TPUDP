@@ -22,8 +22,8 @@ public class p2p {
     public p2p(int port) throws UnknownHostException {
         p_s = port;
         communicant = new HashMap<InetAddress, String>();
-        communicant.put(InetAddress.getByName("192.168.1.25"), "linux");
-        communicant.put(InetAddress.getByName("10.6.0.4"), "pc");
+        communicant.put(InetAddress.getByName("10.42.134.74"), "Melinda");
+        communicant.put(InetAddress.getByName("10.42.206.16"), "Romain");
     }
 
     public void start() {

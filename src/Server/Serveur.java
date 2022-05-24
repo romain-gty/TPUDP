@@ -11,6 +11,7 @@ public class Serveur {
 
     /**
      * Le serveur n'est pas lancé tant que la fonction start n'est pas appellée
+     * 
      * @param port
      */
     public Serveur(int port) {
@@ -19,7 +20,8 @@ public class Serveur {
     }
 
     /**
-     * démarre le serveur sur le port spécifié par le constructeur si il est libre, sinon lance une erreur
+     * démarre le serveur sur le port spécifié par le constructeur si il est libre,
+     * sinon lance une erreur
      */
     public void start() {
         DatagramSocket ds;
@@ -31,8 +33,8 @@ public class Serveur {
             dp = new DatagramPacket(buff, buff.length);
             int i = 0;
             while (i < 10) {
-                ds.receive(dp); //en cas de réception d'une requête
-                newConnection(dp); //on lance un nouveau threade de traitement et on se remet en attente
+                ds.receive(dp); // en cas de réception d'une requête
+                newConnection(dp); // on lance un nouveau thread de traitement et on se remet en attente
                 i++;
             }
             ds.close();
@@ -45,36 +47,40 @@ public class Serveur {
 
     /**
      * Démarre un nouveau thread et répond à la demande de connexion du client
-     * @param dp DatagrammPacket contenant la demande de connexion du client, ainsi que son IP, son port...
+     * 
+     * @param dp DatagrammPacket contenant la demande de connexion du client, ainsi
+     *           que son IP, son port...
      */
     private void newConnection(DatagramPacket dp) {
         new Thread() {
             public void run() {
                 DatagramSocket envoi = null;
                 try {
-                    envoi = new DatagramSocket(); //ouverture d'un nouveau port pour répondre au client
+                    envoi = new DatagramSocket(); // ouverture d'un nouveau port pour répondre au client
                     InetAddress addr = dp.getAddress();
                     int portEnvoi = dp.getPort();
                     byte[] data = dp.getData();
 
                     String texte = new String(data);
+                    System.out.println(texte);
                     texte = texte.substring(0, dp.getLength());
-                    if (texte.equals("ok?")) { //si c'était une demande d'ouverture
+
+                    if (texte.equals("ok?")) { // si c'était une demande d'ouverture
                         DatagramPacket openCom = new DatagramPacket("ok".getBytes(), "ok".getBytes().length, addr,
                                 portEnvoi);
-                        envoi.send(openCom); //on acquiesce
+                        envoi.send(openCom); // on acquiesce
 
-                        Util.waitresponse(dp, envoi); //on attend la requête de l'utilisateur
+                        Util.waitresponse(dp, envoi); // on attend la requête de l'utilisateur
 
                         byte[] dataToSend = dataSelector(data, dp.getLength());
                         DatagramPacket response = new DatagramPacket(dataToSend, dataToSend.length, addr, portEnvoi);
-                        envoi.send(response); //on répond à la requête
+                        envoi.send(response); // on répond à la requête
 
                         dataToSend = "ko".getBytes(); // on demande la fermeture de connection
                         DatagramPacket endCom = new DatagramPacket(dataToSend, dataToSend.length, addr, portEnvoi);
                         envoi.send(endCom);
 
-                        //on attend la réponse pendant 500ms, on quitte avec ou sans réponse
+                        // on attend la réponse pendant 500ms, on quitte avec ou sans réponse
                         Util.waitresponse(dp, envoi);
                         System.out.println("Communication effectuée avec succès\n");
                     }
@@ -93,10 +99,11 @@ public class Serveur {
         }.start();
     }
 
-    
     /***
      * Choisi la réponse à renvoyé au client
-     * @param datas le tableau de byte contenu dans le DatagramPackage de réception
+     * 
+     * @param datas         le tableau de byte contenu dans le DatagramPackage de
+     *                      réception
      * @param lenghtMessage la taille de ce tableau
      * @return le tableau de byte contenant la réponse du server
      */

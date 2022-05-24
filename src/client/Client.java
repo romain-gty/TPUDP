@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 import MyException.MyStandardException;
 import MyException.MyTimeoutException;
@@ -16,10 +18,21 @@ public class Client {
     public Client() {
     }
 
+    public void sendBroadcast() throws SocketException, UnknownHostException, IOException {
+        DatagramSocket socket = new DatagramSocket();
+        socket.setBroadcast(true);
+        DatagramPacket packet = new DatagramPacket("HelloThere".getBytes(), "HelloThere".getBytes().length,
+                InetAddress.getByName("255.255.255.255"), 5000);
+
+        socket.send(packet);
+        socket.close();
+
+    }
 
     /**
      * Envoie le message au destinataire en parametre
-     * @param Message Le message à envoyer
+     * 
+     * @param Message  Le message à envoyer
      * @param portdest Le port de la machine de destination
      * @param addrDest L'ip de la machine de destination, une InetAddress
      */
@@ -31,25 +44,24 @@ public class Client {
         try {
             ds = new DatagramSocket();
             String ligne = Message;
-            dp = new DatagramPacket("ok?".getBytes(), "ok?".getBytes().length, addrDest, portdest); //ouverture de la connexion
+            dp = new DatagramPacket("ok?".getBytes(), "ok?".getBytes().length, addrDest, portdest); // ouverture de la
+                                                                                                    // connexion
             ds.send(dp);
 
-            buff = new byte[128]; //réception de l'acquiescement d'ouverture
+            buff = new byte[128]; // réception de l'acquiescement d'ouverture
             DatagramPacket dpR = new DatagramPacket(buff, buff.length);
             Util.waitresponse(dpR, ds);
             portdest = dpR.getPort();
             String messageRecu = new String(dpR.getData());
             messageRecu = messageRecu.substring(0, 2);
-            if ("ok".equals(messageRecu)) { //si acquiescement reçu
+            if ("ok".equals(messageRecu)) { // si acquiescement reçu
 
-
-                //envoi du message
+                // envoi du message
                 byte[] message = ligne.getBytes();
                 dp = new DatagramPacket(message, message.length, addrDest, portdest);
                 ds.send(dp);
 
-
-                //réception du message du serveur
+                // réception du message du serveur
                 buff = new byte[8192];
                 DatagramPacket recep = new DatagramPacket(buff, buff.length);
                 Util.waitresponse(recep, ds);
@@ -60,25 +72,23 @@ public class Client {
                 System.out
                         .println("Reception du port " + portEnvoi + " de la machine " + addr.getHostName() + " :\n"
                                 + texte + "\n");
-                
-                //attente de fermeture
+
+                // attente de fermeture
                 DatagramPacket endCom = new DatagramPacket(buff, buff.length);
                 Util.waitresponse(endCom, ds);
                 messageRecu = new String(endCom.getData());
                 messageRecu = messageRecu.substring(0, 2);
-                if ("ko".equals(messageRecu)) { //si demande de femeture reçu on aquiesce
+                if ("ko".equals(messageRecu)) { // si demande de femeture reçu on aquiesce
                     dp = new DatagramPacket("ok".getBytes(), "ok".getBytes().length, addrDest, portdest);
                     ds.send(dp);
                     System.out.println("Communication effectuée avec Succès !\n");
-                } else { //si pas d'acquiescement reçu on lance une erreur
+                } else { // si pas d'acquiescement reçu on lance une erreur
                     throw new MyStandardException("Erreur lors de la fermeture de la connexion.\n");
                 }
 
-            } else { //si pas d'acquiescement reçu
+            } else { // si pas d'acquiescement reçu
                 throw new MyStandardException("Connection non validée par l'hôte\n");
             }
-
-            
 
         } catch (MyTimeoutException e) {
             System.out.println("Temps d'attente dépassée\n");
@@ -88,15 +98,15 @@ public class Client {
             System.out.println("Une erreur est survenue lors de la communication :\nMessage de l'ereur :\n"
                     + e.getMessage() + "\n");
         }
-        ds.close(); //on ferme le socket dans tous les cas
+        ds.close(); // on ferme le socket dans tous les cas
         System.out.println("Fin de connexion\n");
     }
 
-
-
     /***
      * Permet à l'utilisateur d'envoyer un message par la CLI
-     * @return false si l'utilsateur n'a pas demandé à quitter (en tapant q ou exit à la place du message), true sinon
+     * 
+     * @return false si l'utilsateur n'a pas demandé à quitter (en tapant q ou exit
+     *         à la place du message), true sinon
      */
     public boolean sendMessage() {
         String mess;

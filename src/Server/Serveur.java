@@ -57,6 +57,7 @@ public class Serveur {
                 DatagramSocket envoi = null;
                 try {
                     envoi = new DatagramSocket(); // ouverture d'un nouveau port pour répondre au client
+
                     InetAddress addr = dp.getAddress();
                     int portEnvoi = dp.getPort();
                     byte[] data = dp.getData();
@@ -76,6 +77,10 @@ public class Serveur {
                         DatagramPacket response = new DatagramPacket(dataToSend, dataToSend.length, addr, portEnvoi);
                         envoi.send(response); // on répond à la requête
 
+                        /*  TODO Vérification des informations de correction */
+
+
+
                         dataToSend = "ko".getBytes(); // on demande la fermeture de connection
                         DatagramPacket endCom = new DatagramPacket(dataToSend, dataToSend.length, addr, portEnvoi);
                         envoi.send(endCom);
@@ -90,7 +95,7 @@ public class Serveur {
                 }
 
                 catch (Exception e) {
-                    System.out.println("Une erreur est survenue lors de la communication :\nMessage de l'ereur :\n"
+                    System.out.println("Une erreur est survenue lors de la communication :\nMessage d'erreur :\n"
                             + e.getMessage() + "\n");
                 }
                 envoi.close();

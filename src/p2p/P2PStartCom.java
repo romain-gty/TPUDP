@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import MyException.MyTimeoutException;
 import Utilities.Util;
 
 /**
@@ -21,7 +22,7 @@ public class P2PStartCom {
      * @return HashMap<InetAddress, String> contenant l'ip d'une paie en clef et le
      *         nom d'utilisateur associé en valeur
      */
-    public static HashMap<InetAddress, String> getPeer(InetAddress peerClient) {
+    public static HashMap<InetAddress, String> getPeer(InetAddress peerClient, String username) {
         ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
         HashMap<InetAddress, String> result = new HashMap<InetAddress, String>();
 
@@ -41,10 +42,11 @@ public class P2PStartCom {
             String texte = new String(data);
             System.out.println(texte);
             texte = texte.substring(0, dpRecep.getLength());
-
+            InetAddress ipRecep = null;
             while (!texte.equals("ko")) { // tant que la machine serveur de noms n'a dit que l'on termine
                 try {
-                    InetAddress.getByName(texte);
+                    ipRecep = InetAddress.getByName(texte);
+                    addresses.add(ipRecep);
                 } catch (Exception e) {
                     System.out.println("erreur lors de l'enregistrement de l'ip reçu");
                     System.out.println(e.getMessage());
@@ -64,7 +66,11 @@ public class P2PStartCom {
             // hashmap
 
             for (InetAddress ip : addresses) {
-                result.put(ip, getUserName(envoi, ip));
+                try {
+                    result.put(ip, getUserName(envoi, ip));
+                } catch (MyTimeoutException e) {
+                    result.put(ip, username);
+                }
                 System.out.println(ip.getHostAddress() + " ajoutée avec le nom " + result.get(ip));
             }
 
@@ -77,10 +83,10 @@ public class P2PStartCom {
         return result;
     }
 
-
     /**
      * Permet de recevoir le nopm d'utilisateur de l'IP passée en paramètres
-     * @param ds socket d'envoi de la requête
+     * 
+     * @param ds   socket d'envoi de la requête
      * @param addr addresse dont on veut connaître le nom
      * @return String, nom d'utilisateur
      * @throws IOException
@@ -93,15 +99,15 @@ public class P2PStartCom {
         Util.waitresponse(dpRecep, ds);
         byte[] name = dp.getData();
         String text = new String(name);
-        return text.substring(0, dpRecep.getLength());
+        return text;
     }
 
     /**
      * Envoi la hashmap d'ips à l'adresse addr par le socket ds
      * 
-     * @param ds socket d'envoi de la requête
+     * @param ds       socket d'envoi de la requête
      * @param addr
-     * @param port port d'envoie de la machine demandeuse
+     * @param port     port d'envoie de la machine demandeuse
      * @param knownIPs
      * @throws IOException
      */
@@ -111,20 +117,21 @@ public class P2PStartCom {
             DatagramPacket packet = new DatagramPacket(entry.getKey().getHostAddress().getBytes(),
                     entry.getKey().getHostAddress().getBytes().length, addr, port);
             ds.send(packet);
-            System.out.println("Entrée " + entry.getValue() + " envoyée à " + addr.getHostAddress() + " sur le port " + port);
+            System.out.println(
+                    "Entrée " + entry.getValue() + " envoyée à " + addr.getHostAddress() + " sur le port " + port);
         }
         byte[] dataToSend = "ko".getBytes();
         DatagramPacket endCom = new DatagramPacket(dataToSend, dataToSend.length, addr, port);
         ds.send(endCom);
     }
 
-
     /**
      * Envoi son nom d'utilisateur à la machine demandeuse
-     * @param ds socket d'envoi de la requête
+     * 
+     * @param ds       socket d'envoi de la requête
      * @param userName nom d'utilisateur à envoyer
-     * @param addr adresse de la machine demandeuse
-     * @param port port d'envoie de la machine demandeuse
+     * @param addr     adresse de la machine demandeuse
+     * @param port     port d'envoie de la machine demandeuse
      * @throws IOException
      */
     public static void sendUserName(DatagramSocket ds, String userName, InetAddress addr, int port) throws IOException {

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -53,10 +54,11 @@ public class P2Pui {
         } while (notKnownIp);
 
         if (!bufferString.equals("")) {
-            for (HashMap.Entry<InetAddress, String> entry : P2PStartCom.getPeer(IP).entrySet()) {
-                if(entry.getValue().equals("UNinconnu")){
+
+            for (HashMap.Entry<InetAddress, String> entry : P2PStartCom.getPeer(IP, logique.username).entrySet()) {
+                if (entry.getValue().equals("UNinconnu")) {
                     logique.communicant.put(entry.getKey(), logique.username);
-                }else{
+                } else {
                     logique.communicant.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -95,6 +97,14 @@ public class P2Pui {
         String mess;
         int i = 1;
         for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
+            if (entry.getValue().equals("UNinconnu")) {
+                try {
+                    DatagramSocket ds = new DatagramSocket();
+                    communicant.put(entry.getKey(), P2PStartCom.getUserName(ds, entry.getKey()));
+                } catch (Exception e) {
+                    System.out.println("Erreur lors de la réception d'un nom");
+                }
+            }
             System.out.println(i + "   " + entry.getValue());
             ListIP.put(i, entry.getKey());
             i++;
@@ -147,6 +157,7 @@ public class P2Pui {
 
     /**
      * Permet la lecture d'une chaîne de caractère depuis l'entrée standard
+     * 
      * @return la chaîne de caractère entrée par l'utilisateur
      */
     private String lectureStringClavier() {
@@ -164,6 +175,7 @@ public class P2Pui {
 
     /**
      * Affiche le message entrant contenu dans dp
+     * 
      * @param dp un DatagramPacket contenant le message à afficher
      */
     public void displayInMessage(DatagramPacket dp) {

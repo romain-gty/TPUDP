@@ -88,17 +88,18 @@ public class p2p {
                     if (message.equals("clients")) {
                         communicant.put(addr,"UNinconnu");
                         P2PStartCom.sendMap(envoi, addr, port, communicant);
-                        communicant.put(addr, P2PStartCom.getUserName(envoi, addr));
                     }
 
                     else if (message.equals("UN")) {
                         P2PStartCom.sendUserName(envoi, username, addr, port);
-                        communicant.put(addr, P2PStartCom.getUserName(envoi, addr));
+                        communicant.put(addr, "UNinconnu");
                     }
 
                     else {
                         ui.displayInMessage(dp);
                     }
+
+
 
                 } catch (MyTimeoutException e) {
                     System.out.println("Temps d'attente dépassée\n");

@@ -48,11 +48,11 @@ public class Util {
      */
     public static void waitresponse(DatagramPacket dp, DatagramSocket socket) {
         try {
-            socket.setSoTimeout(500);
+            socket.setSoTimeout(2000);
             socket.receive(dp);
 
         } catch (java.net.SocketTimeoutException e) {
-            throw new MyTimeoutException(e.getMessage());
+            throw new MyTimeoutException("Temps d'attente dépassé "+ e.getMessage());
         } catch (Exception e) {
             throw new MyStandardException(e.getMessage());
         }

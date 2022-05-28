@@ -97,7 +97,7 @@ public class P2Pui {
         String mess;
         int i = 1;
         for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
-            if (entry.getValue().equals("UNinconnu")) {
+            if (entry.getValue().equals("UNinconnu") || entry.getValue().equals("UN")) {
                 try {
                     DatagramSocket ds = new DatagramSocket();
                     communicant.put(entry.getKey(), P2PStartCom.getUserName(ds, entry.getKey()));

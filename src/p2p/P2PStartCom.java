@@ -65,6 +65,7 @@ public class P2PStartCom {
 
             for (InetAddress ip : addresses) {
                 result.put(ip, getUserName(envoi, ip));
+                System.out.println(ip.getHostAddress() + " ajoutée avec le nom " + result.get(ip));
             }
 
         } catch (Exception e) {

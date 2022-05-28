@@ -84,17 +84,17 @@ public class p2p {
                     byte[] data = dp.getData();
                     String message = new String(data);
 
-                    switch (message) {
-                        case ("clients"):
-                            P2PStartCom.sendMap(envoi, addr, communicant);
-                            break;
-                        case ("UN"):
-                            P2PStartCom.sendUserName(envoi, username, addr);
-                            communicant.put(addr, P2PStartCom.getUserName(envoi, addr));
-                            break;
-                        default:
-                            ui.displayInMessage(dp);
-                            break;
+                    if (message.equals("clients")) {
+                        P2PStartCom.sendMap(envoi, addr, communicant);
+                    }
+
+                    else if (message.equals("UN")) {
+                        P2PStartCom.sendUserName(envoi, username, addr);
+                        communicant.put(addr, P2PStartCom.getUserName(envoi, addr));
+                    }
+
+                    else {
+                        ui.displayInMessage(dp);
                     }
 
                 } catch (MyTimeoutException e) {
@@ -109,6 +109,7 @@ public class p2p {
                 // System.out.println("Fin de connexion\n");
             }
         }.start();
+
     }
 
     /**

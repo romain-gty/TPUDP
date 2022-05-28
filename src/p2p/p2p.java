@@ -25,7 +25,6 @@ public class p2p {
     public void start() {
         ui.startFunction();
 
-        System.out.println("username: " + username);
 
         new Thread() {
             public void run() {
@@ -87,8 +86,9 @@ public class p2p {
                     message = message.substring(0, dp.getLength());
 
                     if (message.equals("clients")) {
-                        System.out.println("hereBoy");
+                        communicant.put(addr,"UNinconnu");
                         P2PStartCom.sendMap(envoi, addr, port, communicant);
+                        communicant.put(addr, P2PStartCom.getUserName(envoi, addr));
                     }
 
                     else if (message.equals("UN")) {

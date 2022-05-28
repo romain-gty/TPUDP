@@ -53,7 +53,7 @@ public class P2Pui {
         } while (notKnownIp);
 
         if (!bufferString.equals("")) {
-            P2PStartCom.getPeer(IP);
+            logique.communicant = P2PStartCom.getPeer(IP);
         } else {
             do {
                 bufferString = "";

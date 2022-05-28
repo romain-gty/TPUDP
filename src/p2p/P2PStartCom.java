@@ -111,7 +111,7 @@ public class P2PStartCom {
             DatagramPacket packet = new DatagramPacket(entry.getKey().getHostAddress().getBytes(),
                     entry.getKey().getHostAddress().getBytes().length, addr, port);
             ds.send(packet);
-            System.out.println("Entrée " + entry.getValue() + " envoyée à " + addr.getHostAddress());
+            System.out.println("Entrée " + entry.getValue() + " envoyée à " + addr.getHostAddress() + " sur le port " + port);
         }
         byte[] dataToSend = "ko".getBytes();
         DatagramPacket endCom = new DatagramPacket(dataToSend, dataToSend.length, addr, port);

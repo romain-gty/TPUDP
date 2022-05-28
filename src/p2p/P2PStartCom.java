@@ -97,8 +97,9 @@ public class P2PStartCom {
         byte[] buffRecep = new byte[128];
         DatagramPacket dpRecep = new DatagramPacket(buffRecep, 128);
         Util.waitresponse(dpRecep, ds);
-        byte[] name = dp.getData();
+        byte[] name = dpRecep.getData();
         String text = new String(name);
+        text =text.substring(0, dpRecep.getLength());
         return text;
     }
 

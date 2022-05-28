@@ -82,14 +82,17 @@ public class p2p {
                     envoi = new DatagramSocket(); // ouverture d'un nouveau port pour répondre au client
                     InetAddress addr = dp.getAddress();
                     byte[] data = dp.getData();
+                    int port = dp.getPort();
                     String message = new String(data);
+                    message = message.substring(0, dp.getLength());
 
                     if (message.equals("clients")) {
-                        P2PStartCom.sendMap(envoi, addr, communicant);
+                        System.out.println("hereBoy");
+                        P2PStartCom.sendMap(envoi, addr, port, communicant);
                     }
 
                     else if (message.equals("UN")) {
-                        P2PStartCom.sendUserName(envoi, username, addr);
+                        P2PStartCom.sendUserName(envoi, username, addr, port);
                         communicant.put(addr, P2PStartCom.getUserName(envoi, addr));
                     }
 

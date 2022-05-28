@@ -100,30 +100,34 @@ public class P2PStartCom {
      * 
      * @param ds socket d'envoi de la requête
      * @param addr
+     * @param port port d'envoie de la machine demandeuse
      * @param knownIPs
+     * @throws IOException
      */
-    public static void sendMap(DatagramSocket ds, InetAddress addr, HashMap<InetAddress, String> knownIPs)
+    public static void sendMap(DatagramSocket ds, InetAddress addr, int port, HashMap<InetAddress, String> knownIPs)
             throws IOException {
         for (HashMap.Entry<InetAddress, String> entry : knownIPs.entrySet()) {
             DatagramPacket packet = new DatagramPacket(entry.getKey().getHostAddress().getBytes(),
-                    entry.getKey().getHostAddress().getBytes().length, addr, 5000);
+                    entry.getKey().getHostAddress().getBytes().length, addr, port);
             ds.send(packet);
+            System.out.println("Entrée " + entry.getValue() + " envoyée à " + addr.getHostAddress());
         }
         byte[] dataToSend = "ko".getBytes();
-        DatagramPacket endCom = new DatagramPacket(dataToSend, dataToSend.length, addr, 5000);
+        DatagramPacket endCom = new DatagramPacket(dataToSend, dataToSend.length, addr, port);
         ds.send(endCom);
     }
 
 
-    /***
+    /**
      * Envoi son nom d'utilisateur à la machine demandeuse
      * @param ds socket d'envoi de la requête
      * @param userName nom d'utilisateur à envoyer
      * @param addr adresse de la machine demandeuse
+     * @param port port d'envoie de la machine demandeuse
      * @throws IOException
      */
-    public static void sendUserName(DatagramSocket ds, String userName, InetAddress addr) throws IOException {
-        DatagramPacket packet = new DatagramPacket(userName.getBytes(), userName.getBytes().length, addr, 5000);
+    public static void sendUserName(DatagramSocket ds, String userName, InetAddress addr, int port) throws IOException {
+        DatagramPacket packet = new DatagramPacket(userName.getBytes(), userName.getBytes().length, addr, port);
         ds.send(packet);
 
     }

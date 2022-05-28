@@ -53,7 +53,13 @@ public class P2Pui {
         } while (notKnownIp);
 
         if (!bufferString.equals("")) {
-            logique.communicant = P2PStartCom.getPeer(IP);
+            for (HashMap.Entry<InetAddress, String> entry : P2PStartCom.getPeer(IP).entrySet()) {
+                if(entry.getValue().equals("UNinconnu")){
+                    logique.communicant.put(entry.getKey(), logique.username);
+                }else{
+                    logique.communicant.put(entry.getKey(), entry.getValue());
+                }
+            }
         } else {
             do {
                 bufferString = "";

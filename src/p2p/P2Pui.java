@@ -95,34 +95,49 @@ public class P2Pui {
     public void sendMessage() {
         HashMap<Integer, InetAddress> ListIP = new HashMap<Integer, InetAddress>();
         String mess;
-        int i = 1;
-        for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
-            if (entry.getValue().equals("UNinconnu") || entry.getValue().equals("UN")) {
-                try {
-                    DatagramSocket ds = new DatagramSocket();
-                    communicant.put(entry.getKey(), P2PStartCom.getUserName(ds, entry.getKey()));
-                } catch (Exception e) {
-                    System.out.println("Erreur lors de la réception d'un nom");
-                }
-            }
-            System.out.println(i + "   " + entry.getValue());
-            ListIP.put(i, entry.getKey());
-            i++;
-        }
-
-        System.out.println("Entrez le numéro du destinataire");
+        
         int port_dest = 5000;
         int num_dest;
+        boolean nombreNonCorrecte;
+        do {int i = 1;
+            for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
+                if (entry.getValue().equals("UNinconnu") || entry.getValue().equals("UN")) {
+                    try {
+                        DatagramSocket ds = new DatagramSocket();
+                        communicant.put(entry.getKey(), P2PStartCom.getUserName(ds, entry.getKey()));
+                    } catch (Exception e) {
+                        System.out.println("Erreur lors de la réception d'un nom");
+                    }
+                }
+                System.out.println(i + "   " + entry.getValue());
+                ListIP.put(i, entry.getKey());
+                i++;
+            }
 
-        do {
-
+            System.out.println("Entrez le numéro du destinataire");
+            
+            
+            nombreNonCorrecte = false;
             num_dest = lectureIntClavier();
-        } while ((num_dest <= 0) || (num_dest >= i));
+            if ((num_dest <= 0) || (num_dest >= i)) {
+                nombreNonCorrecte = true;
+                System.out.println(
+                        "Le numéro de destinataire n'est pas un entier positif ou est plus grand que le nombre de destinataires : "
+                                + i);
+            }
+        } while (nombreNonCorrecte);
         mess = "";
+        boolean messageNonCorrecte;
         do {
+            messageNonCorrecte = false;
             System.out.println("entrez un message");
             mess = lectureStringClavier();
-        } while (mess.equals(""));
+            if (mess.equals("") || mess.getBytes().length > 128) {
+                System.out.println("Le message est vide ou est trop grand\nLa taille du message est de "
+                        + mess.getBytes().length + " > 128");
+                messageNonCorrecte =true;
+            }
+        } while (messageNonCorrecte);
 
         try {
             logique.sendMessage(mess, port_dest, ListIP.get(num_dest));
@@ -144,13 +159,8 @@ public class P2Pui {
         try {
             inValue = br.readLine();
             intInValue = Integer.parseInt(inValue);
-            if (intInValue < 0) {
-                throw new Exception("L'entier n'est pas positif");
-            }
 
-        } catch (Exception e) {
-            System.out.println("La valeur rentrée n'est pas un entier positif");
-        }
+        } catch (Exception e) {}
 
         return intInValue;
     }
@@ -178,15 +188,14 @@ public class P2Pui {
      * 
      * @param dp un DatagramPacket contenant le message à afficher
      */
-    public void displayInMessage(DatagramPacket dp) {
+    public void displayInMessage(DatagramPacket dp) throws IOException{
         InetAddress addr = dp.getAddress();
         byte[] data = dp.getData();
         String message = new String(data);
         String expediteur = communicant.get(addr);
-        message = message.substring(0,dp.getLength());
+        message = message.substring(0, dp.getLength());
 
         System.out.println("\nNouveau message de " + expediteur + " :\n" + message);
-
     }
 
 }

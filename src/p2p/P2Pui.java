@@ -95,11 +95,13 @@ public class P2Pui {
     public void sendMessage() {
         HashMap<Integer, InetAddress> ListIP = new HashMap<Integer, InetAddress>();
         String mess;
-        
+
         int port_dest = 5000;
         int num_dest;
         boolean nombreNonCorrecte;
-        do {int i = 1;
+        do {
+            int i = 1;
+            System.out.println("0   Tous");
             for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
                 if (entry.getValue().equals("UNinconnu") || entry.getValue().equals("UN")) {
                     try {
@@ -109,23 +111,24 @@ public class P2Pui {
                         System.out.println("Erreur lors de la réception d'un nom");
                     }
                 }
+                
                 System.out.println(i + "   " + entry.getValue());
                 ListIP.put(i, entry.getKey());
                 i++;
             }
 
             System.out.println("Entrez le numéro du destinataire");
-            
-            
+
             nombreNonCorrecte = false;
             num_dest = lectureIntClavier();
-            if ((num_dest <= 0) || (num_dest >= i)) {
+            if ((num_dest < 0) || (num_dest >= i)) {
                 nombreNonCorrecte = true;
                 System.out.println(
                         "Le numéro de destinataire n'est pas un entier positif ou est plus grand que le nombre de destinataires : "
                                 + i);
             }
         } while (nombreNonCorrecte);
+
         mess = "";
         boolean messageNonCorrecte;
         do {
@@ -135,14 +138,20 @@ public class P2Pui {
             if (mess.equals("") || mess.getBytes().length > 128) {
                 System.out.println("Le message est vide ou est trop grand\nLa taille du message est de "
                         + mess.getBytes().length + " > 128");
-                messageNonCorrecte =true;
+                messageNonCorrecte = true;
             }
         } while (messageNonCorrecte);
 
-        try {
-            logique.sendMessage(mess, port_dest, ListIP.get(num_dest));
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        if (mess.equals("q") || mess.equals("exit")) {
+            logique.sendMessageToAll("ko");
+            logique.noQuit = false;
+            System.out.println("Sortie du programme !\n");
+        } else {
+            if (num_dest > 0) {
+                logique.sendMessage(mess, port_dest, ListIP.get(num_dest));
+            } else {
+                logique.sendMessageToAll(mess);
+            }
         }
 
     }
@@ -160,7 +169,8 @@ public class P2Pui {
             inValue = br.readLine();
             intInValue = Integer.parseInt(inValue);
 
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         return intInValue;
     }
@@ -188,7 +198,7 @@ public class P2Pui {
      * 
      * @param dp un DatagramPacket contenant le message à afficher
      */
-    public void displayInMessage(DatagramPacket dp) throws IOException{
+    public void displayInMessage(DatagramPacket dp) throws IOException {
         InetAddress addr = dp.getAddress();
         byte[] data = dp.getData();
         String message = new String(data);

@@ -40,7 +40,7 @@ public class P2PStartCom {
 
             byte[] data = dpRecep.getData();
             String texte = new String(data);
-            System.out.println(texte);
+
             texte = texte.substring(0, dpRecep.getLength());
             InetAddress ipRecep = null;
             while (!texte.equals("ko")) { // tant que la machine serveur de noms n'a dit que l'on termine
@@ -58,7 +58,6 @@ public class P2PStartCom {
 
                 data = dpRecep.getData();
                 texte = new String(data);
-                System.out.println(texte);
                 texte = texte.substring(0, dpRecep.getLength());
             }
 

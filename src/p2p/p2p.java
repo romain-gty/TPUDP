@@ -15,11 +15,13 @@ public class p2p {
     public String username;
     public HashMap<InetAddress, String> communicant; // Ip et username
     private P2Pui ui;
+    public boolean noQuit;
 
     public p2p(int port) throws UnknownHostException {
         p_s = port;
         communicant = new HashMap<InetAddress, String>();
         ui = new P2Pui(this);
+        noQuit = true;
     }
 
     public void start() {
@@ -36,7 +38,7 @@ public class p2p {
                     buff = new byte[128];
                     ds = new DatagramSocket(p_s);
                     dp = new DatagramPacket(buff, buff.length);
-                    while (true) {
+                    while (noQuit) {
                         ds.receive(dp); // en cas de réception d'une requête
                         newConnection(dp); // on lance un nouveau thread de traitement et on se remet en attente
                     }
@@ -57,7 +59,7 @@ public class p2p {
             }
         }.start();
 
-        while (true) {
+        while (noQuit) {
             ui.sendMessage();
             try {
                 Thread.sleep(1000);
@@ -94,6 +96,9 @@ public class p2p {
                         P2PStartCom.sendUserName(envoi, username, addr, port);
                         communicant.put(addr, "UNinconnu");
                     }
+                    else if (message.equals("ko")) {
+                        communicant.remove(addr);
+                    }
 
                     else {
                         ui.displayInMessage(dp);
@@ -114,6 +119,16 @@ public class p2p {
             }
         }.start();
 
+    }
+
+    /**
+     * Envoi à message à tous les destinataires connus
+     * @param message
+     */
+    public void sendMessageToAll(String message) {
+        for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
+            sendMessage(message, p_s, entry.getKey());
+        }
     }
 
     /**

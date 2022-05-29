@@ -183,6 +183,7 @@ public class P2Pui {
         byte[] data = dp.getData();
         String message = new String(data);
         String expediteur = communicant.get(addr);
+        message = message.substring(0,dp.getLength());
 
         System.out.println("\nNouveau message de " + expediteur + " :\n" + message);
 

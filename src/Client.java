@@ -59,10 +59,15 @@ public class Client {
             } while (port_dest == -1);
         }
 
+        /*Saisie des données d'information*/
+        String username = lectureStringUsername();
+        String mdp = lectureStringMdp();
+
+        /*Si les informations de connexion sont bonnes; on transmet le message */
         mess = lectureStringClavier();
 
         try {
-            sendMessage(mess, port_dest,
+            sendMessage(username+";"+ mdp +";"+ mess, port_dest,
                     InetAddress.getByAddress(new byte[] { (byte) ip[0], (byte) ip[1], (byte) ip[2], (byte) ip[3] }));
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -101,6 +106,39 @@ public class Client {
                 if (mess.getBytes().length > 128) {
                     System.out.println("Message Trop grand");
                 }
+                mess = br.readLine();
+            } while (mess.getBytes().length > 128);
+
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return mess;
+    }
+
+    public static String lectureStringMdp() {
+        String mess = "";
+        System.out.println("Entrez votre mot de passe");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            do {
+                if (mess.getBytes().length > 128) {
+                    System.out.println("Mot de passe trop long");
+                }
+                mess = br.readLine();
+            } while (mess.getBytes().length > 128);
+
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return mess;
+    }
+
+    public static String lectureStringUsername() {
+        String mess = "";
+        System.out.println("Entrez votre Username");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            do {
                 mess = br.readLine();
             } while (mess.getBytes().length > 128);
 

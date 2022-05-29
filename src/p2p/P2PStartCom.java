@@ -70,7 +70,6 @@ public class P2PStartCom {
                 } catch (MyTimeoutException e) {
                     result.put(ip, username);
                 }
-                System.out.println(ip.getHostAddress() + " ajoutée avec le nom " + result.get(ip));
             }
 
         } catch (Exception e) {
@@ -78,7 +77,6 @@ public class P2PStartCom {
                     + e.getMessage() + "\n");
         }
         envoi.close();
-        System.out.println("Fin de récupération des noms\n");
         return result;
     }
 
@@ -117,8 +115,6 @@ public class P2PStartCom {
             DatagramPacket packet = new DatagramPacket(entry.getKey().getHostAddress().getBytes(),
                     entry.getKey().getHostAddress().getBytes().length, addr, port);
             ds.send(packet);
-            System.out.println(
-                    "Entrée " + entry.getValue() + " envoyée à " + addr.getHostAddress() + " sur le port " + port);
         }
         byte[] dataToSend = "ko".getBytes();
         DatagramPacket endCom = new DatagramPacket(dataToSend, dataToSend.length, addr, port);

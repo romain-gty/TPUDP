@@ -103,6 +103,7 @@ public class p2p {
                     else {
                         ui.displayInMessage(dp);
                     }
+                    ui.displayDestinations();
 
 
 

@@ -12,11 +12,13 @@ import java.util.HashMap;
 public class P2Pui {
 
     HashMap<InetAddress, String> communicant;
+    HashMap<Integer, InetAddress> ListIP;
     p2p logique;
 
     public P2Pui(p2p logique) {
         this.logique = logique;
         communicant = this.logique.communicant;
+        ListIP = new HashMap<Integer, InetAddress>();
     }
 
     /**
@@ -93,31 +95,14 @@ public class P2Pui {
      *         à la place du message), true sinon
      */
     public void sendMessage() {
-        HashMap<Integer, InetAddress> ListIP = new HashMap<Integer, InetAddress>();
+
         String mess;
 
         int port_dest = 5000;
         int num_dest;
         boolean nombreNonCorrecte;
         do {
-            int i = 1;
-            System.out.println("0   Tous");
-            for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
-                if (entry.getValue().equals("UNinconnu") || entry.getValue().equals("UN")) {
-                    try {
-                        DatagramSocket ds = new DatagramSocket();
-                        communicant.put(entry.getKey(), P2PStartCom.getUserName(ds, entry.getKey()));
-                    } catch (Exception e) {
-                        System.out.println("Erreur lors de la réception d'un nom");
-                    }
-                }
-                
-                System.out.println(i + "   " + entry.getValue());
-                ListIP.put(i, entry.getKey());
-                i++;
-            }
-
-            System.out.println("Entrez le numéro du destinataire");
+            int i = displayDestinations();
 
             nombreNonCorrecte = false;
             num_dest = lectureIntClavier();
@@ -206,6 +191,29 @@ public class P2Pui {
         message = message.substring(0, dp.getLength());
 
         System.out.println("\nNouveau message de " + expediteur + " :\n" + message);
+    }
+
+    public int displayDestinations() {
+        int i = 1;
+        System.out.println("\nDestinataires :\n 0   Tous");
+        ListIP.clear();
+        for (HashMap.Entry<InetAddress, String> entry : communicant.entrySet()) {
+            if (entry.getValue().equals("UNinconnu") || entry.getValue().equals("UN")) {
+                try {
+                    DatagramSocket ds = new DatagramSocket();
+                    communicant.put(entry.getKey(), P2PStartCom.getUserName(ds, entry.getKey()));
+                } catch (Exception e) {
+                    System.out.println("Erreur lors de la réception d'un nom");
+                }
+            }
+
+            System.out.println(i + "   " + entry.getValue());
+            ListIP.put(i, entry.getKey());
+            i++;
+        }
+
+        System.out.println("Entrez le numéro du destinataire");
+        return i;
     }
 
 }
